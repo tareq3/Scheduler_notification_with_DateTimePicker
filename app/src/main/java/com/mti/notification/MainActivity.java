@@ -6,6 +6,7 @@
 
 package com.mti.notification;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,77 +21,96 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
- String CHANNEL_ID;
-    Context mContext;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
+
+import java.util.Calendar;
+
+public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener{
+    private static final String TAG = "MainActivity";
+LocalData mLocalData;
+    Calendar mCalendar;
+    TimePickerDialog mTimePickerDialog;
+    DatePickerDialog mDatePickerDialog;
+    Button mButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mContext=getApplicationContext();
-  CHANNEL_ID =getString(R.string.default_notification_channel_id);
+        mCalendar = Calendar.getInstance();
+        mButton = findViewById(R.id.button);
 
-  createNotificationChannel();
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+
+mLocalData=new LocalData(this);
+
+
+
+
+        mTimePickerDialog = TimePickerDialog.newInstance(
+                this,
+                mCalendar.get(Calendar.HOUR_OF_DAY),
+                mCalendar.get(Calendar.MINUTE),
+                mCalendar.get(Calendar.SECOND),
+                false
+
+        );
+
+        mDatePickerDialog = DatePickerDialog.newInstance(
+                this,
+                mCalendar.get(Calendar.YEAR),
+                mCalendar.get(Calendar.MONTH),
+                mCalendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        mDatePickerDialog.show(getFragmentManager(), "Datepickerdialog");
+
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+        mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                //region Tap Action for the Notifiacation
-                // Create an explicit intent for an Activity in your app
-                Intent intent = new Intent(mContext, Alert.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-                //endregion
-
-                NotificationCompat.Builder builder=new NotificationCompat.Builder(mContext,CHANNEL_ID);
-
-                //region Build Notifiacation
-               builder  .setContentTitle("Tareq")
-                        .setContentText("Is a kid")
-
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        // Set the intent that will fire when the user taps the notification
-                        .setContentIntent(pendingIntent)
-                        //setAutoCancel automitically remove the notification on tap
-                        .setAutoCancel(true);
-                //endregion
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    builder .setSmallIcon(R.drawable.ic_launcher_foreground);
-                }else{
-                    //as kitkat have some default notification sound issue we need to setSound with the builder
-                      Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                        builder.setSound(alarmSound);
-
-
-                      builder.setSmallIcon(R.mipmap.ic_launcher);
-                }
-
-
-                //region Show Notification
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mContext);
-
-                // notificationId is a unique int for each notification that you must define
-                notificationManager.notify(1, builder.build());
-                //endregion
+                mDatePickerDialog.show(getFragmentManager(), "Datepickerdialog");
             }
         });
+
+
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.default_notification_channel_name);
-            String description = "Ajaira description";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+
+    @Override
+    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+        mCalendar.set(Calendar.YEAR, year);
+        mCalendar.set(Calendar.MONTH, monthOfYear);
+        mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        mTimePickerDialog.show(getFragmentManager(), "Timepickerdialog");
     }
+
+    @Override
+    public void onTimeSet(TimePickerDialog view, int hourOfDay, int minute, int second) {
+        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        mCalendar.set(Calendar.MINUTE, minute);
+        mCalendar.set(Calendar.SECOND, second);
+
+
+
+        mLocalData.setmSec(mCalendar.getTimeInMillis());
+        NotificationScheduler.setReminder(MainActivity.this, AlarmReceiver.class, mLocalData.get_hour(), mLocalData.get_min(), mLocalData.getmSec());
+
+
+
+    }
+
+
 }
