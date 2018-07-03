@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Calendar;
@@ -31,22 +32,14 @@ import static android.content.Context.ALARM_SERVICE;
  */
 class NotificationScheduler {
 
-    private static final int DAILY_REMINDER_REQUEST_CODE = 100;
+    public NotificationScheduler() {
+    }
+
+    // private static final int DAILY_REMINDER_REQUEST_CODE = 100;
     public static   String CHANNEL_ID;
-    public static void setReminder(Context context, Class<?> cls, int hour, int min, Long aLong) {
 
-        Calendar calendar = Calendar.getInstance();
+    public static void setReminder(Context context, Class<?> cls, int alram_Req_Code_ID, Long aLong) {
 
-        Calendar setcalendar = Calendar.getInstance();
-        setcalendar.set(Calendar.HOUR_OF_DAY, hour);
-        setcalendar.set(Calendar.MINUTE, min);
-        setcalendar.set(Calendar.SECOND, 0);
-
-        // cancel already scheduled reminders
-        cancelReminder(context,cls);
-
-        if(setcalendar.before(calendar))
-            setcalendar.add(Calendar.DATE,1);
 
         // Enable a receiver
 
@@ -61,7 +54,7 @@ class NotificationScheduler {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
 
         Intent notificationIntent = new Intent(context, cls);
-        PendingIntent broadcast = PendingIntent.getBroadcast(context, DAILY_REMINDER_REQUEST_CODE, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent broadcast = PendingIntent.getBroadcast(context, alram_Req_Code_ID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -73,9 +66,9 @@ class NotificationScheduler {
 
     }
 
-    public static void cancelReminder(Context context,Class<?> cls)
+    public static void cancelReminder(Context context,Class<?> cls,int alarm_Req_Code_ID)
     {
-        // Disable a receiver
+     /*   // Disable a receiver
 
         ComponentName receiver = new ComponentName(context, cls);
         PackageManager pm = context.getPackageManager();
@@ -83,12 +76,15 @@ class NotificationScheduler {
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
-
+*/
         Intent intent1 = new Intent(context, cls);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, DAILY_REMINDER_REQUEST_CODE, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, alarm_Req_Code_ID, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        am.cancel(pendingIntent);
-        pendingIntent.cancel();
+        if (am != null) {
+            am.cancel(pendingIntent);
+            Log.d("Notification", "Delete: cancel"+alarm_Req_Code_ID);
+        }
+      //  pendingIntent.cancel();
     }
 
     public static void showNotification(Context context, Class<?> cls, String title, String content) {

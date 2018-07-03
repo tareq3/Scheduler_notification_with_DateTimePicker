@@ -16,24 +16,50 @@ package com.mti.notification;
  * Created by Tareq on 30,June,2018.
  */
 
+import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class AlarmReceiver extends BroadcastReceiver{
+import com.mti.notification.Recycler.ModelEntity.AlarmModel;
+import com.mti.notification.RoomDB.AlarmDatabase;
 
+import java.util.List;
+
+import static com.mti.notification.MainActivity.DATABASE_NAME;
+
+public class AlarmReceiver extends BroadcastReceiver{
+    private AlarmDatabase mAlarmDatabase;
     Context mContext;
     @Override
     public void onReceive(Context context, Intent intent) {
         // TODO Auto-generated method stub
 
+
+
         if (intent.getAction() != null && context != null) {
             if (intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)) {
+
+                mAlarmDatabase= Room.databaseBuilder(context, AlarmDatabase.class, DATABASE_NAME)
+                        .fallbackToDestructiveMigration()
+                        .build();
+
                 // Set the alarm here.
-                Log.d("AlarmReciever", "onReceive: BOOT_COMPLETED");
-                LocalData localData = new LocalData(context);
-                NotificationScheduler.setReminder(context, AlarmReceiver.class, localData.get_hour(), localData.get_min(), localData.getmSec());
+             //   Log.d("AlarmReciever", "onReceive: BOOT_COMPLETED");
+             //   LocalData localData = new LocalData(context);
+
+               final Context mContext=context;
+               new Thread(new Runnable() {
+                   @Override
+                   public void run() {
+                      List<AlarmModel> alarmModelList=mAlarmDatabase.daoAccess().fetchAllAlarmTasks();
+
+                       for(AlarmModel alarmModel : alarmModelList)
+                       NotificationScheduler.setReminder(mContext, AlarmReceiver.class,alarmModel.getAlramId() , alarmModel.getSec());
+
+                   }
+               }).start();
                 return;
             }
         }
