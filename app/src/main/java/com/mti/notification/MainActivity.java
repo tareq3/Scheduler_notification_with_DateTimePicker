@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
     ListItemAdapter mAdapter;
 
-    private List<AlarmModel> mToDoList=new ArrayList<>();
+   public static List<AlarmModel> mToDoList=new ArrayList<>();
 
 
     //RoomDB Declaration
@@ -134,6 +134,9 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                        mAlarmDatabase.daoAccess().clearAlarms();
 
                        loadData2List();
+
+                       //if no alarm on the list then disable the reciever for battery saving
+                       NotificationScheduler.disableReciever(getApplicationContext(),AlarmReceiver.class);
                    }
                }).start();
             }
@@ -272,13 +275,17 @@ runOnUiThread(new Runnable() {
 
 
                 Log.d("" +getClass().getName(), "Delete"+model.getAlramId());
-                NotificationScheduler.cancelReminder(getApplicationContext(), AlarmReceiver.class,model.getAlramId());
 
                 //deleting item
                 mAlarmDatabase.daoAccess().deleteSingleAlarm(model);
 
+
                 //reloading the recyclerView
                  loadData2List();
+
+                //cancel the reminder
+                NotificationScheduler.cancelReminder(getApplicationContext(), AlarmReceiver.class,model.getAlramId());
+
             }
         }).start();
 

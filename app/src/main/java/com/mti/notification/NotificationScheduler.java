@@ -41,14 +41,8 @@ class NotificationScheduler {
     public static void setReminder(Context context, Class<?> cls, int alram_Req_Code_ID, Long aLong) {
 
 
-        // Enable a receiver
+        enableReciever(context,cls);
 
-        ComponentName receiver = new ComponentName(context, cls);
-        PackageManager pm = context.getPackageManager();
-
-        pm.setComponentEnabledSetting(receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP);
 
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
@@ -66,17 +60,21 @@ class NotificationScheduler {
 
     }
 
-    public static void cancelReminder(Context context,Class<?> cls,int alarm_Req_Code_ID)
-    {
-     /*   // Disable a receiver
+    private static void enableReciever(Context context, Class<?> cls) {
+        // Enable a receiver
 
         ComponentName receiver = new ComponentName(context, cls);
         PackageManager pm = context.getPackageManager();
 
         pm.setComponentEnabledSetting(receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
-*/
+    }
+
+    public static void cancelReminder(Context context,Class<?> cls,int alarm_Req_Code_ID){
+        if(MainActivity.mToDoList.size()<=0) {
+            disableReciever(context, cls);
+        }
         Intent intent1 = new Intent(context, cls);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, alarm_Req_Code_ID, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
@@ -84,8 +82,24 @@ class NotificationScheduler {
             am.cancel(pendingIntent);
             Log.d("Notification", "Delete: cancel"+alarm_Req_Code_ID);
         }
-      //  pendingIntent.cancel();
+        pendingIntent.cancel();
     }
+
+    public static void disableReciever(Context context, Class<?> cls) {
+        //Todo: As we are using mutiple scheduler we don't wanna disable reciever
+        // Disable a receiver
+
+        ComponentName receiver = new ComponentName(context, cls);
+        PackageManager pm = context.getPackageManager();
+
+        pm.setComponentEnabledSetting(receiver,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+
+    }
+
+
+
 
     public static void showNotification(Context context, Class<?> cls, String title, String content) {
         Intent notificationIntent = new Intent(context, cls);
