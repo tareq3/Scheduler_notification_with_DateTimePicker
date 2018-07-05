@@ -33,7 +33,7 @@ public class AlarmReceiver extends BroadcastReceiver{
                 // Set the alarm here.
                 Log.d("AlarmReciever", "onReceive: BOOT_COMPLETED");
                 LocalData localData = new LocalData(context);
-                NotificationScheduler.setReminder(context, AlarmReceiver.class, localData.get_hour(), localData.get_min(), localData.getmSec());
+                NotificationScheduler.setReminder(context, AlarmReceiver.class,  localData.getmSec());
                 return;
             }
         }
@@ -41,8 +41,8 @@ public class AlarmReceiver extends BroadcastReceiver{
         Log.d("AlarmReciever", "onReceive: ");
 
         //Trigger the notification
-        NotificationScheduler.showNotification(context, MainActivity.class,
-                "You have 5 unwatched videos", "Watch them now?");
+        NotificationScheduler.showNotification(context, Alert.class, //so if we click on notification that will take to alert activity
+                "Rush Hour", "Watch 3 of them now?");
 
 
 

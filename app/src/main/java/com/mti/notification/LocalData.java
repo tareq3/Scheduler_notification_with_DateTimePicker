@@ -21,8 +21,7 @@ public class LocalData {
 
     private static final String reminderStatus="reminderStatus";
 
-    private static final String hour="hour";
-    private static final String min="min";
+    private static final String mSec="mSec";
 
     public  Long getmSec() {
         return appSharedPref.getLong(mSec, 0);
@@ -33,7 +32,7 @@ public class LocalData {
         prefEditor.putLong(mSec, sec);
         prefEditor.commit();
     }
-    private static final String mSec="mSec";
+
 
     public LocalData(Context context) {
         this.appSharedPref=context.getSharedPreferences(APP_SHARED_PREF, Context.MODE_PRIVATE);
@@ -51,31 +50,6 @@ public class LocalData {
         prefEditor.putBoolean(reminderStatus,status);
         prefEditor.commit();
 
-    }
-    // Settings Page Reminder Time (Hour)
-
-    public int get_hour()
-    {
-        return appSharedPref.getInt(hour, 20);
-    }
-
-    public void set_hour(int h)
-    {
-        prefEditor.putInt(hour, h);
-        prefEditor.commit();
-    }
-
-    // Settings Page Reminder Time (Minutes)
-
-    public int get_min()
-    {
-        return appSharedPref.getInt(min, 0);
-    }
-
-    public void set_min(int m)
-    {
-        prefEditor.putInt(min, m);
-        prefEditor.commit();
     }
 
     public void reset()

@@ -31,22 +31,19 @@ import static android.content.Context.ALARM_SERVICE;
  */
 class NotificationScheduler {
 
+    //For mutiple Alarm we have just change the request code
     private static final int DAILY_REMINDER_REQUEST_CODE = 100;
+
     public static   String CHANNEL_ID;
-    public static void setReminder(Context context, Class<?> cls, int hour, int min, Long aLong) {
+    public static void setReminder(Context context, Class<?> cls, Long aLong) {
 
         Calendar calendar = Calendar.getInstance();
 
-        Calendar setcalendar = Calendar.getInstance();
-        setcalendar.set(Calendar.HOUR_OF_DAY, hour);
-        setcalendar.set(Calendar.MINUTE, min);
-        setcalendar.set(Calendar.SECOND, 0);
 
-        // cancel already scheduled reminders
-        cancelReminder(context,cls);
+        //as we want only one scheduler Alarm cancel already scheduled reminders
+        cancelReminder(context,cls); //delete this line if u need mutiple alarm
 
-        if(setcalendar.before(calendar))
-            setcalendar.add(Calendar.DATE,1);
+
 
         // Enable a receiver
 
@@ -75,14 +72,19 @@ class NotificationScheduler {
 
     public static void cancelReminder(Context context,Class<?> cls)
     {
-        // Disable a receiver
+        //Todo: if u r using mutilple alarm don't disable alarm
 
+        //Disable receiver when no Alarm is setted
+        //region  Disable a receiver
         ComponentName receiver = new ComponentName(context, cls);
         PackageManager pm = context.getPackageManager();
 
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
+        //endregion
+
+
 
         Intent intent1 = new Intent(context, cls);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, DAILY_REMINDER_REQUEST_CODE, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -90,6 +92,8 @@ class NotificationScheduler {
         am.cancel(pendingIntent);
         pendingIntent.cancel();
     }
+
+
 
     public static void showNotification(Context context, Class<?> cls, String title, String content) {
         Intent notificationIntent = new Intent(context, cls);
@@ -99,6 +103,7 @@ class NotificationScheduler {
         stackBuilder.addNextIntent(notificationIntent);
         Toast.makeText(context, "Alarm triggered", Toast.LENGTH_SHORT).show();
 
+        //we need channel id for oreo
         CHANNEL_ID=context.getString(R.string.default_notification_channel_id);
 
 

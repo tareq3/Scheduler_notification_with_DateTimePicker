@@ -6,23 +6,10 @@
 
 package com.mti.notification;
 
-import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
@@ -31,7 +18,7 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener{
     private static final String TAG = "MainActivity";
-LocalData mLocalData;
+    LocalData mLocalData;
     Calendar mCalendar;
     TimePickerDialog mTimePickerDialog;
     DatePickerDialog mDatePickerDialog;
@@ -45,11 +32,19 @@ LocalData mLocalData;
         mButton = findViewById(R.id.button);
 
 
-mLocalData=new LocalData(this);
+        mLocalData=new LocalData(this);
+
+
+
+        initDateTimeDialog();
 
 
 
 
+
+    }
+
+    private void initDateTimeDialog() {
         mTimePickerDialog = TimePickerDialog.newInstance(
                 this,
                 mCalendar.get(Calendar.HOUR_OF_DAY),
@@ -65,9 +60,6 @@ mLocalData=new LocalData(this);
                 mCalendar.get(Calendar.MONTH),
                 mCalendar.get(Calendar.DAY_OF_MONTH)
         );
-
-        mDatePickerDialog.show(getFragmentManager(), "Datepickerdialog");
-
 
     }
 
@@ -104,11 +96,16 @@ mLocalData=new LocalData(this);
         mCalendar.set(Calendar.SECOND, second);
 
 
+        //On setting the date and time auto trigger the notification Sceduler
+        triggerNotificationSceduler();
 
+
+
+    }
+
+    private void triggerNotificationSceduler() {
         mLocalData.setmSec(mCalendar.getTimeInMillis());
-        NotificationScheduler.setReminder(MainActivity.this, AlarmReceiver.class, mLocalData.get_hour(), mLocalData.get_min(), mLocalData.getmSec());
-
-
+        NotificationScheduler.setReminder(MainActivity.this, AlarmReceiver.class, mLocalData.getmSec());
 
     }
 
